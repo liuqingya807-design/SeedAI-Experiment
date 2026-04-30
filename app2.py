@@ -1,4 +1,4 @@
-import os
+mport os
 import sys
 import subprocess
 
@@ -648,6 +648,7 @@ else:
                 "total_turns": [total_turns],
                 "first_intervene_turn": [first_intervene_turn],
                 "total_intervene_count": [total_intervene_count],
+                "user_answer": [user_task_input],
                 "full_dialogue": [full_dialogue]
             }
 
