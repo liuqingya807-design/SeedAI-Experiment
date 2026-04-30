@@ -44,7 +44,7 @@ if not is_running_with_streamlit():
 # 1. DeepSeek 配置
 # =====================================================
 # 方式一：直接在这里填写你的 DeepSeek API Key
-DEEPSEEK_API_KEY = "sk-f9fd213424cf41d29cf7c564be6ac48d"
+DEEPSEEK_API_KEY = ""
 
 # 方式二：如果你设置了系统环境变量，则优先使用环境变量
 # 如果没有设置环境变量，就使用上面的 DEEPSEEK_API_KEY
