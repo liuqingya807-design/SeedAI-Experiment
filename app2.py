@@ -429,23 +429,11 @@ def render_nudge(last_ai_response):
         elif len(last_ai_response) > 2 and "、" not in last_ai_response[:50]:
             with st.container(key="seed_nudge_fixed_area"):
                 st.warning("💡 提示：内容结构较零散，建议分点整理")
-                if st.button("  自动分点整理"):
-                    prompt = "请帮我把内容整理成清晰的分点条目"
-                    st.session_state.messages.append({"role": "user", "content": prompt})
-                    ai_reply = fetch_ai_response(st.session_state.messages)
-                    st.session_state.messages.append({"role": "assistant", "content": ai_reply})
-                    st.rerun()
             st.session_state.nudge_container_created = True
 
         elif "会" in last_ai_response[:30] or "可以" in last_ai_response[:30]:
             with st.container(key="seed_nudge_fixed_area"):
                 st.warning("💡 提示：表述偏口语，建议使用专业 HR 用语")
-                if st.button("🔧 自动优化专业度"):
-                    prompt = "请使用专业的HR招聘术语，不要口语化"
-                    st.session_state.messages.append({"role": "user", "content": prompt})
-                    ai_reply = fetch_ai_response(st.session_state.messages)
-                    st.session_state.messages.append({"role": "assistant", "content": ai_reply})
-                    st.rerun()
             st.session_state.nudge_container_created = True
 
     return None
