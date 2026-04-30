@@ -331,6 +331,7 @@ if prompt:
 
 
 # --- 导出数据（含完整对话）---
+# --- 导出数据（含完整对话）---
 st.divider()
 
 user_turns = len([
@@ -347,44 +348,22 @@ else:
     if "experiment_completed" not in st.session_state:
         st.session_state.experiment_completed = False
 
-    # 初始化实验数据
-    if "experiment_csv_data" not in st.session_state:
-        st.session_state.experiment_csv_data = None
-
     # "完成并导出实验数据"按钮 - 点击后固定显示
-    if st.button("✅ 完成并导出实验数据") or st.session_state.experiment_completed:
+    if st.button("✅ 完成并提交实验数据") or st.session_state.experiment_completed:
+        
+        # 只在第一次点击时生成数据
         if not st.session_state.experiment_completed:
-            first_intervene_turn = (
-                st.session_state.first_intervene
-                if st.session_state.first_intervene
-                else 0
-            )
-
+            first_intervene_turn = st.session_state.first_intervene or 0
             total_intervene_count = st.session_state.total_intervene
-
-            total_turns = len([
-                m for m in st.session_state.messages
-                if m["role"] == "user"
-            ])
+            total_turns = len([m for m in st.session_state.messages if m["role"] == "user"])
 
             full_dialogue = ""
-
             for msg in st.session_state.messages:
                 role = "用户" if msg["role"] == "user" else "AI"
                 full_dialogue += f"[{role}]: {msg['content']}\n\n"
-            
+
+            # 构造数据（已删除 deepseek_response）
             final_data = {
-                "user_id": st.session_state.user_id,
-                "group": st.session_state.task_type,
-                "total_turns": total_turns,
-                "first_intervene_turn": first_intervene_turn,
-                "total_intervene_count": total_intervene_count,
-                "user_answer": user_task_input,
-                "deepseek_response": st.session_state.messages[-1]["content"] if st.session_state.messages else "",
-                "full_dialogue": full_dialogue
-            }
-            
-            save_data_to_database({
                 "user_id": str(st.session_state.user_id),
                 "group": str(st.session_state.task_type),
                 "total_turns": str(total_turns),
@@ -392,18 +371,16 @@ else:
                 "total_intervene_count": str(total_intervene_count),
                 "user_answer": str(user_task_input),
                 "full_dialogue": str(full_dialogue)
-            })
-            st.session_state.experiment_csv_data = final_df.to_csv(index=False, encoding="utf-8-sig")
+            }
+
+            # 自动保存到 SeaTable
+            save_data_to_database(final_data)
+
+            # 标记完成
             st.session_state.experiment_completed = True
+            st.success("✅ 实验数据已成功提交！")
 
-        if st.session_state.experiment_csv_data:
-            st.download_button(
-                "📥 点击下载 CSV 文件",
-                st.session_state.experiment_csv_data,
-                f"SeedAI_{st.session_state.user_id}.csv",
-                "text/csv"
-            )
-
+        # 问卷按钮 - 只保留这个
         if st.button("📝 实验已经完成，请点击进行问卷填写", key="btn_questionnaire"):
             st.query_params["page"] = "questionnaire"
             rerun_app()
