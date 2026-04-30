@@ -4,6 +4,7 @@ import subprocess
 import random
 import streamlit as st
 import pandas as pd
+import requests  # 新增
 from openai import OpenAI
 
 
@@ -40,7 +41,27 @@ if not is_running_with_streamlit():
 
     sys.exit()
 
+# 1. SeaTable 数据库配置（你只需要填这里）
+# =====================================================
+SEATABLE_API_TOKEN = "你的API Token"
+SEATABLE_BASE_UUID = "你的表格UUID"
+SEATABLE_TABLE_NAME = "研究3"
 
+# 自动保存数据到数据库
+def save_data_to_database(data):
+    try:
+        url = f"https://cloud.seatable.cn/api/v1/dtable/{SEATABLE_BASE_UUID}/rows/"
+        headers = {
+            "Authorization": f"Bearer {SEATABLE_API_TOKEN}",
+            "Content-Type": "application/json"
+        }
+        payload = {
+            "table_name": SEATABLE_TABLE_NAME,
+            "rows": [data]
+        }
+        requests.post(url, json=payload, headers=headers)
+    except:
+        pass
 # =====================================================
 # 1. DeepSeek 配置
 # =====================================================
@@ -351,27 +372,35 @@ else:
             for msg in st.session_state.messages:
                 role = "用户" if msg["role"] == "user" else "AI"
                 full_dialogue += f"[{role}]: {msg['content']}\n\n"
-
+            
             final_data = {
+                "user_id": st.session_state.user_id,
+                "group": st.session_state.task_type,
+                "total_turns": total_turns,
+                "first_intervene_turn": first_intervene_turn,
+                "total_intervene_count": total_intervene_count,
+                "user_answer": user_task_input,
+                "deepseek_response": st.session_state.messages[-1]["content"] if st.session_state.messages else "",
+                "full_dialogue": full_dialogue
+            }
+
+            # ====================== 【自动保存到数据库】 ======================
+            save_data_to_database(final_data)
+            # ================================================================
+
+            final_df = pd.DataFrame({
                 "user_id": [st.session_state.user_id],
                 "group": [st.session_state.task_type],
                 "total_turns": [total_turns],
                 "first_intervene_turn": [first_intervene_turn],
                 "total_intervene_count": [total_intervene_count],
                 "user_answer": [user_task_input],
-                "deepseek_response": [
-                    st.session_state.messages[-1]["content"]
-                    if len(st.session_state.messages) > 0
-                    else ""
-                ],
+                "deepseek_response": [st.session_state.messages[-1]["content"] if st.session_state.messages else ""],
                 "full_dialogue": [full_dialogue]
-            }
-
-            final_df = pd.DataFrame(final_data)
+            })
             st.session_state.experiment_csv_data = final_df.to_csv(index=False, encoding="utf-8-sig")
             st.session_state.experiment_completed = True
 
-        # 显示CSV下载按钮
         if st.session_state.experiment_csv_data:
             st.download_button(
                 "📥 点击下载 CSV 文件",
@@ -380,7 +409,6 @@ else:
                 "text/csv"
             )
 
-        # 问卷按钮 - 始终显示
         if st.button("📝 实验已经完成，请点击进行问卷填写", key="btn_questionnaire"):
             st.query_params["page"] = "questionnaire"
             rerun_app()
