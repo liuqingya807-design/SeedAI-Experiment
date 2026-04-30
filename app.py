@@ -40,6 +40,7 @@ if not is_running_with_streamlit():
 
     sys.exit()
 
+
 # =====================================================
 # 1. DeepSeek 配置
 # =====================================================
@@ -127,12 +128,14 @@ if st.query_params.get("page") == "questionnaire":
         rerun_app()
     st.stop()
 
+
 RESUME_IMAGES = [
     "https://i.imgur.com/hfRjQTI.jpeg",
     "https://i.imgur.com/dDM6Mt2.jpeg",
     "https://i.imgur.com/O5cvFL9.jpeg",
     "https://i.imgur.com/cyRqMzM.jpeg"
 ]
+
 
 if "messages" not in st.session_state:
     st.session_state.messages = []
@@ -149,12 +152,15 @@ if "first_intervene" not in st.session_state:
 if "total_intervene" not in st.session_state:
     st.session_state.total_intervene = 0
 
+
 # --- 4. 页面标题 ---
 st.title("🤖 Seed AI")
+
 
 # --- 5. 侧边栏 ---
 st.sidebar.info(f"**用户ID:** {st.session_state.user_id}")
 st.sidebar.info(f"**实验组:** {st.session_state.task_type}")
+
 
 # --- 6. 简历图片 ---
 st.subheader("📄 简历材料")
@@ -167,11 +173,13 @@ for i, img in enumerate(RESUME_IMAGES):
 
 st.divider()
 
+
 # ==============================================
 # 【任务说明 100% 还原你的文档】
 # ==============================================
 task_type = st.session_state.task_type
 user_task_input = ""
+
 
 if task_type == "low":
     st.markdown("求职者写自我介绍")
@@ -227,6 +235,7 @@ else:
 
     user_task_input = f"录取：{choice} | 专业：{q1} | 算法能力：{q2} | 项目经验：{q3}"
 
+
 st.divider()
 
 
@@ -257,12 +266,15 @@ revision_keywords = [
     "错", "不好", "不够", "重新生成", "换一种", "再来", "重做", "修正"
 ]
 
+
 # --- 聊天界面 ---
 for msg in st.session_state.messages:
     with st.chat_message(msg["role"]):
         st.markdown(msg["content"])
 
+
 prompt = st.chat_input("输入指令（可修改/干预意图）...")
+
 
 if prompt:
     current_turn = len([
@@ -296,6 +308,7 @@ if prompt:
         "content": ai_content
     })
 
+
 # --- 导出数据（含完整对话）---
 st.divider()
 
@@ -304,91 +317,70 @@ user_turns = len([
     if m["role"] == "user"
 ])
 
+
 if user_turns < 3:
     st.warning(f"当前对话轮次：{user_turns}，**至少完成3轮对话**才能提交实验")
 
 else:
-    if st.button("✅ 完成并导出实验数据"):
-        first_intervene_turn = (
-            st.session_state.first_intervene
-            if st.session_state.first_intervene
-            else 0
-        )
+    # 初始化实验完成状态
+    if "experiment_completed" not in st.session_state:
+        st.session_state.experiment_completed = False
 
-        total_intervene_count = st.session_state.total_intervene
+    # 初始化实验数据
+    if "experiment_csv_data" not in st.session_state:
+        st.session_state.experiment_csv_data = None
 
-        total_turns = len([
-            m for m in st.session_state.messages
-            if m["role"] == "user"
-        ])
+    # "完成并导出实验数据"按钮 - 点击后固定显示
+    if st.button("✅ 完成并导出实验数据") or st.session_state.experiment_completed:
+        if not st.session_state.experiment_completed:
+            first_intervene_turn = (
+                st.session_state.first_intervene
+                if st.session_state.first_intervene
+                else 0
+            )
 
-        full_dialogue = ""
+            total_intervene_count = st.session_state.total_intervene
 
-        for msg in st.session_state.messages:
-            role = "用户" if msg["role"] == "user" else "AI"
-            full_dialogue += f"[{role}]: {msg['content']}\n\n"
+            total_turns = len([
+                m for m in st.session_state.messages
+                if m["role"] == "user"
+            ])
 
-        final_data = {
-            "user_id": [st.session_state.user_id],
-            "group": [st.session_state.task_type],
-            "total_turns": [total_turns],
-            "first_intervene_turn": [first_intervene_turn],
-            "total_intervene_count": [total_intervene_count],
-            "user_answer": [user_task_input],
-            "deepseek_response": [
-                st.session_state.messages[-1]["content"]
-                if len(st.session_state.messages) > 0
-                else ""
-            ],
-            "full_dialogue": [full_dialogue]
-        }
+            full_dialogue = ""
 
-        final_df = pd.DataFrame(final_data)
+            for msg in st.session_state.messages:
+                role = "用户" if msg["role"] == "user" else "AI"
+                full_dialogue += f"[{role}]: {msg['content']}\n\n"
 
-        csv = final_df.to_csv(index=False, encoding="utf-8-sig")
+            final_data = {
+                "user_id": [st.session_state.user_id],
+                "group": [st.session_state.task_type],
+                "total_turns": [total_turns],
+                "first_intervene_turn": [first_intervene_turn],
+                "total_intervene_count": [total_intervene_count],
+                "user_answer": [user_task_input],
+                "deepseek_response": [
+                    st.session_state.messages[-1]["content"]
+                    if len(st.session_state.messages) > 0
+                    else ""
+                ],
+                "full_dialogue": [full_dialogue]
+            }
 
-        st.download_button(
-            "📥 点击下载 CSV 文件",
-            csv,
-            f"SeedAI_{st.session_state.user_id}.csv",
-            "text/csv"
-        )
+            final_df = pd.DataFrame(final_data)
+            st.session_state.experiment_csv_data = final_df.to_csv(index=False, encoding="utf-8-sig")
+            st.session_state.experiment_completed = True
 
-    # --- CSV下载按钮 ---
-    first_intervene_turn = st.session_state.first_intervene if st.session_state.first_intervene else 0
-    total_intervene_count = st.session_state.total_intervene
-    total_turns = len([m for m in st.session_state.messages if m["role"] == "user"])
+        # 显示CSV下载按钮
+        if st.session_state.experiment_csv_data:
+            st.download_button(
+                "📥 点击下载 CSV 文件",
+                st.session_state.experiment_csv_data,
+                f"SeedAI_{st.session_state.user_id}.csv",
+                "text/csv"
+            )
 
-    full_dialogue = ""
-    for msg in st.session_state.messages:
-        role = "用户" if msg["role"] == "user" else "AI"
-        full_dialogue += f"[{role}]: {msg['content']}\n\n"
-
-    download_data = {
-        "user_id": [st.session_state.user_id],
-        "group": [st.session_state.task_type],
-        "total_turns": [total_turns],
-        "first_intervene_turn": [first_intervene_turn],
-        "total_intervene_count": [total_intervene_count],
-        "user_answer": [user_task_input],
-        "deepseek_response": [
-            st.session_state.messages[-1]["content"]
-            if len(st.session_state.messages) > 0
-            else ""
-        ],
-        "full_dialogue": [full_dialogue]
-    }
-
-    download_df = pd.DataFrame(download_data)
-    download_csv = download_df.to_csv(index=False, encoding="utf-8-sig")
-
-    st.download_button(
-        "📥 点击下载 CSV 文件",
-        download_csv,
-        f"SeedAI_{st.session_state.user_id}.csv",
-        "text/csv"
-    )
-
-    if st.button("📝 实验已经完成，请点击进行问卷填写", key="btn_questionnaire"):
-        st.query_params["page"] = "questionnaire"
-        rerun_app()
+        # 问卷按钮 - 始终显示
+        if st.button("📝 实验已经完成，请点击进行问卷填写", key="btn_questionnaire"):
+            st.query_params["page"] = "questionnaire"
+            rerun_app()
