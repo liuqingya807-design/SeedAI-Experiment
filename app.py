@@ -43,8 +43,8 @@ if not is_running_with_streamlit():
 
 # 1. SeaTable 数据库配置（你只需要填这里）
 # =====================================================
-SEATABLE_API_TOKEN = "你的API Token"
-SEATABLE_BASE_UUID = "你的表格UUID"
+SEATABLE_API_TOKEN = "dda3828e095fe4c2e8c89f407daf06f9d3e83b64"
+SEATABLE_BASE_UUID = "9dba7359-e941-451b-a19a-6bc2afcbaea6"
 SEATABLE_TABLE_NAME = "研究3"
 
 # 自动保存数据到数据库
