@@ -383,20 +383,15 @@ else:
                 "deepseek_response": st.session_state.messages[-1]["content"] if st.session_state.messages else "",
                 "full_dialogue": full_dialogue
             }
-
-            # ====================== 【自动保存到数据库】 ======================
-            save_data_to_database(final_data)
-            # ================================================================
-
-            final_df = pd.DataFrame({
-                "user_id": [st.session_state.user_id],
-                "group": [st.session_state.task_type],
-                "total_turns": [total_turns],
-                "first_intervene_turn": [first_intervene_turn],
-                "total_intervene_count": [total_intervene_count],
-                "user_answer": [user_task_input],
-                "deepseek_response": [st.session_state.messages[-1]["content"] if st.session_state.messages else ""],
-                "full_dialogue": [full_dialogue]
+            
+            save_data_to_database({
+                "user_id": str(st.session_state.user_id),
+                "group": str(st.session_state.task_type),
+                "total_turns": str(total_turns),
+                "first_intervene_turn": str(first_intervene_turn),
+                "total_intervene_count": str(total_intervene_count),
+                "user_answer": str(user_task_input),
+                "full_dialogue": str(full_dialogue)
             })
             st.session_state.experiment_csv_data = final_df.to_csv(index=False, encoding="utf-8-sig")
             st.session_state.experiment_completed = True
