@@ -1,0 +1,15 @@
+user_id,group,total_turns,first_intervene_turn,total_intervene_count,user_answer,full_dialogue
+user_530224,high,3,0,0,录取：候选人1 | 专业：熟练使用 PyTorch，有模型调优经验，满足岗位核心能力 | 算法能力： | 项目经验：,"[用户]: 你好
+
+[AI]: 你好！有什么我可以帮你的吗？😊
+
+[用户]: 你好
+
+[AI]: 你好呀！😊 有什么可以帮你的吗？无论是聊天、问问题，还是需要帮忙，我都在这里！
+
+[用户]: 你好
+
+[AI]: 你好！很高兴再次见到你～😊  
+有什么想聊的，或者需要帮忙的吗？我随时都在！
+
+"
