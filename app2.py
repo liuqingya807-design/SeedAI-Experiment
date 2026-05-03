@@ -413,8 +413,8 @@ def render_nudge(last_ai_response):
                 st.session_state.btn_b_points_clicked = False
                 st.rerun()
         return None
-        
-        if st.session_state.group == 'A':
+
+    if st.session_state.group == 'A':
         if 'nudge_container_created' not in st.session_state:
             st.session_state.nudge_container_created = False
 
@@ -575,6 +575,7 @@ def render_nudge(last_ai_response):
         st.session_state.a_nudge_shown_types = list(shown_types)
         st.session_state.a_nudge_last_user_turn = current_user_turns
         st.session_state.nudge_container_created = True
+
 # --- 聊天界面 ---
 for msg in st.session_state.messages:
     with st.chat_message(msg["role"]):
