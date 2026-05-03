@@ -414,30 +414,167 @@ def render_nudge(last_ai_response):
                 st.rerun()
         return None
 
-    if st.session_state.group == 'A':
+     if st.session_state.group == 'A':
         if 'nudge_container_created' not in st.session_state:
             st.session_state.nudge_container_created = False
+
+        if 'a_nudge_shown_types' not in st.session_state:
+            st.session_state.a_nudge_shown_types = []
+
+        if 'a_nudge_completed_types' not in st.session_state:
+            st.session_state.a_nudge_completed_types = []
+
+        if 'a_nudge_last_user_turn' not in st.session_state:
+            st.session_state.a_nudge_last_user_turn = 0
 
         if st.session_state.nudge_container_created:
             return None
 
-        if len(last_ai_response) > 150:
-            with st.container(key="seed_nudge_fixed_area"):
-                st.warning("💡 提示：内容较长，建议精简为 100-120 字")
-            st.session_state.nudge_container_created = True
+        if not last_ai_response:
+            return None
 
-        elif len(last_ai_response) > 2 and "、" not in last_ai_response[:50]:
-            with st.container(key="seed_nudge_fixed_area"):
-                st.warning("💡 提示：内容结构较零散，建议分点整理")
-            st.session_state.nudge_container_created = True
+        current_user_turns = len([
+            m for m in st.session_state.messages
+            if m["role"] == "user"
+        ])
 
-        elif "会" in last_ai_response[:30] or "可以" in last_ai_response[:30]:
-            with st.container(key="seed_nudge_fixed_area"):
-                st.warning("💡 提示：表述偏口语，建议使用专业 HR 用语")
-            st.session_state.nudge_container_created = True
+        if current_user_turns == 0:
+            return None
 
-    return None
+        # 避免同一轮重复显示提示
+        if st.session_state.a_nudge_last_user_turn == current_user_turns:
+            return None
 
+        # 获取用户最近一轮输入，用来判断用户是否已经按某类提示进行了追问
+        last_user_prompt = ""
+        for msg in reversed(st.session_state.messages):
+            if msg["role"] == "user":
+                last_user_prompt = msg["content"]
+                break
+
+        shown_types = set(st.session_state.a_nudge_shown_types)
+        completed_types = set(st.session_state.a_nudge_completed_types)
+
+        # 如果用户已经明确追问过某类优化，就认为该类提示已被响应，后续不再重复提示
+        if any(k in last_user_prompt for k in ["分点", "列表", "条理", "结构", "层次"]):
+            completed_types.add("structure")
+
+        if any(k in last_user_prompt for k in ["100", "120", "字数", "精简", "简短", "短一点", "控制"]):
+            completed_types.add("length")
+
+        if any(k in last_user_prompt for k in ["一致", "检查", "录取人选", "评价理由", "是否匹配", "最终选择"]):
+            completed_types.add("consistency")
+
+        if any(k in last_user_prompt for k in ["依据", "理由", "岗位", "JD", "匹配", "项目经验"]):
+            completed_types.add("evidence")
+
+        st.session_state.a_nudge_completed_types = list(completed_types)
+
+        # =============================
+        # 智能判断 AI 当前回答的问题
+        # =============================
+
+        response_text = last_ai_response.strip()
+        compact_text = "".join(response_text.split())
+
+        # 1. 判断是否已经有比较清晰的结构
+        structure_markers = [
+            "专业匹配度", "算法优化能力", "项目经验",
+            "1.", "2.", "3.",
+            "1、", "2、", "3、",
+            "①", "②", "③",
+            "- ", "•"
+        ]
+
+        structure_score = sum(1 for marker in structure_markers if marker in response_text)
+
+        # 如果没有明显分点标记，也没有覆盖三项评价关键词，则认为结构仍可能不够清晰
+        structure_needed = structure_score < 2
+
+        # 2. 判断是否过长
+        # 这里不用原来的 len > 150，因为三项评价合起来超过150字很正常；
+        # 改为总长度过长，或单段过长时才触发字数提示。
+        segments = (
+            response_text
+            .replace("。", "\n")
+            .replace("；", "\n")
+            .replace(";", "\n")
+            .split("\n")
+        )
+        long_segment_exists = any(len(seg.strip()) > 160 for seg in segments if seg.strip())
+        length_needed = len(compact_text) > 420 or long_segment_exists
+
+        # 3. 判断是否缺少岗位匹配依据
+        evidence_keywords = [
+            "岗位", "职责", "要求", "匹配", "依据",
+            "项目", "经验", "算法", "优化", "Python",
+            "TensorFlow", "PyTorch", "机器学习", "深度学习"
+        ]
+        evidence_score = sum(1 for k in evidence_keywords if k in response_text)
+
+        # 如果回答较泛，缺少岗位/能力/项目依据，则提示补充依据
+        evidence_needed = evidence_score < 3
+
+        # 4. 判断是否需要最终一致性检查
+        # 通常至少完成2轮后再提示一致性检查更自然。
+        consistency_needed = current_user_turns >= 2
+
+        # =============================
+        # 按“当前问题 + 未提示过 + 用户未响应过”选择提示
+        # =============================
+
+        candidate_nudges = []
+
+        if structure_needed:
+            candidate_nudges.append({
+                "type": "structure",
+                "text": "💡 提示：内容结构建议分点整理。"
+            })
+
+        if length_needed:
+            candidate_nudges.append({
+                "type": "length",
+                "text": "💡 提示：当前内容偏长，建议将每项评价精简为100-120字。"
+            })
+
+        if evidence_needed:
+            candidate_nudges.append({
+                "type": "evidence",
+                "text": "💡 提示：建议补充候选人的依据，例如技能与JD要求的匹配关系。"
+            })
+
+        if consistency_needed:
+            candidate_nudges.append({
+                "type": "consistency",
+                "text": "💡 提示：请检查录取人选与三项评价理由是否一致。"
+            })
+
+        selected_nudge = None
+
+        # 第一轮筛选：优先选择“当前确实需要、且没有提示过、用户也没有响应过”的提示
+        for nudge in candidate_nudges:
+            if nudge["type"] not in shown_types and nudge["type"] not in completed_types:
+                selected_nudge = nudge
+                break
+
+        # 第二轮兜底：如果所有当前问题都提示过，但用户还没有响应过，可以选一个未响应的
+        if selected_nudge is None:
+            for nudge in candidate_nudges:
+                if nudge["type"] not in completed_types:
+                    selected_nudge = nudge
+                    break
+
+        # 第三轮兜底：如果已经没有合适提示，则不再提示，避免循环
+        if selected_nudge is None:
+            return None
+
+        with st.container(key="seed_nudge_fixed_area"):
+            st.warning(selected_nudge["text"])
+
+        shown_types.add(selected_nudge["type"])
+        st.session_state.a_nudge_shown_types = list(shown_types)
+        st.session_state.a_nudge_last_user_turn = current_user_turns
+        st.session_state.nudge_container_created = True
 # --- 聊天界面 ---
 for msg in st.session_state.messages:
     with st.chat_message(msg["role"]):
