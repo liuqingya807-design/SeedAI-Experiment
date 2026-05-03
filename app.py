@@ -143,10 +143,10 @@ if st.query_params.get("page") == "questionnaire":
 
 
 RESUME_IMAGES = [
-    "C:\Users\Lenovo\Desktop\简历1.jpg",
-    "C:\Users\Lenovo\Desktop\简历2.jpg",
-    "C:\Users\Lenovo\Desktop\简历3.jpg",
-    "C:\Users\Lenovo\Desktop\简历4.jpg"
+    "https://github.com/liuqingya807-design/SeedAI-Experiment/blob/ff5794fd39593a9f5b2b744a546ffa87d185d9c3/%E7%AE%80%E5%8E%861.jpg",
+    "https://github.com/liuqingya807-design/SeedAI-Experiment/blob/ff5794fd39593a9f5b2b744a546ffa87d185d9c3/%E7%AE%80%E5%8E%862.jpg",
+    "https://github.com/liuqingya807-design/SeedAI-Experiment/blob/ff5794fd39593a9f5b2b744a546ffa87d185d9c3/%E7%AE%80%E5%8E%863.jpg",
+    "https://github.com/liuqingya807-design/SeedAI-Experiment/blob/ff5794fd39593a9f5b2b744a546ffa87d185d9c3/%E7%AE%80%E5%8E%864.jpg"
 ]
 
 
