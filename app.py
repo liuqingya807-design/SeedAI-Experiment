@@ -143,11 +143,11 @@ if st.query_params.get("page") == "questionnaire":
 
 
 RESUME_IMAGES = [
-    ""C:\Users\Lenovo\Desktop\简历1.jpg"",
-    ""C:\Users\Lenovo\Desktop\简历2.jpg"",
-    ""C:\Users\Lenovo\Desktop\简历3.jpg"",
-    ""C:\Users\Lenovo\Desktop\简历4.jpg""
-    ]
+    "C:\Users\Lenovo\Desktop\简历1.jpg",
+    "C:\Users\Lenovo\Desktop\简历2.jpg",
+    "C:\Users\Lenovo\Desktop\简历3.jpg",
+    "C:\Users\Lenovo\Desktop\简历4.jpg"
+]
 
 
 if "messages" not in st.session_state:
