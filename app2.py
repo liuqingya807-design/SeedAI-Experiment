@@ -274,10 +274,10 @@ client = OpenAI(
 
 # 简历图片链接
 RESUME_IMAGES = [
-    "https://i.imgur.com/hfRjQTI.jpeg",
-    "https://i.imgur.com/dDM6Mt2.jpeg",
-    "https://i.imgur.com/O5cvFL9.jpeg",
-    "https://i.imgur.com/cyRqMzM.jpeg"
+    "https://raw.githubusercontent.com/liuqingya807-design/SeedAI-Experiment/main/简历1.jpg",
+    "https://raw.githubusercontent.com/liuqingya807-design/SeedAI-Experiment/main/简历2.jpg",
+    "https://raw.githubusercontent.com/liuqingya807-design/SeedAI-Experiment/main/简历3.jpg",
+    "https://raw.githubusercontent.com/liuqingya807-design/SeedAI-Experiment/main/简历4.jpg"
 ]
 
 # 初始化实验数据
