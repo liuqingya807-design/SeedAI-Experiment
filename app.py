@@ -143,10 +143,10 @@ if st.query_params.get("page") == "questionnaire":
 
 
 RESUME_IMAGES = [
-    "https://i.imgur.com/hfRjQTI.jpeg",
-    "https://i.imgur.com/dDM6Mt2.jpeg",
-    "https://i.imgur.com/O5cvFL9.jpeg",
-    "https://i.imgur.com/cyRqMzM.jpeg"
+    ""C:\Users\Lenovo\Desktop\简历1.jpg"",
+    ""C:\Users\Lenovo\Desktop\简历2.jpg"",
+    ""C:\Users\Lenovo\Desktop\简历3.jpg"",
+    ""C:\Users\Lenovo\Desktop\简历4.jpg""
 ]
 
 
