@@ -133,7 +133,7 @@ if st.query_params.get("page") == "questionnaire":
     您的回答将被严格保密，仅用于学术研究目的。
     """)
     st.markdown("---")
-    st.markdown("[点击此处填写问卷](https://www.credamo.com/s/umEBviano/)")
+    st.markdown("[点击此处填写问卷](https://www.credamo.com/s/i2YZR3ano/ )")
     st.markdown("cdmq6uhCiueL 邀请您作答问卷《生成式 AI 任务交互体验调查问卷》，点击链接开始作答。")
     st.markdown("---")
     if st.button("← 返回实验页面"):
