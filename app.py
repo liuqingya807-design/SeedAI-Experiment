@@ -90,20 +90,21 @@ st.set_page_config(page_title="Seed AI", layout="centered")
 
 if "consent" not in st.session_state:
     st.markdown("""
-    # 欢迎参与本次实验！
+   # 欢迎参与本次实验！
 尊敬的女士/先生：
-您好！非常感谢您参与本实验，本实验旨在了解用户在求职面试相关任务中与AI助手的交互行为，仅用于毕业论文研究。
+您好！非常感谢您参与本实验，本实验旨在了解用户在<span style="color:red">求职面试相关任务情境中与AI助手的交互行为</span>，仅用于毕业论文研究。
 
 本次实验包含以下内容：
-- 您将被随机分配到「求职者」或「HR」两种角色，并根据页面说明完成相应任务；
-- 任务过程中，您可以与AI助手对话，系统会自动记录您的对话数据（仅用于学术研究，全程匿名、严格保密）；
-- 任务完成后，请根据页面提示保存数据，并填写一份简短的后续问卷；
+- 您将被随机分配到<span style="color:red">「求职者」</span>或<span style="color:red">「HR」</span>两种角色，并根据页面说明完成相应任务；
+- 任务过程中，<span style="color:red">您可以与AI助手对话，辅助您完成相关任务；</span>
+- 任务完成后，请<span style="color:red">根据页面提示保存数据</span>，并<span style="color:red">填写</span>一份简短的后续<span style="color:red">问卷</span>；
+- <span style="color:red">问卷中需要填写用户ID，请提前记录下您的用户ID，以便填写。</span>
 
 实验流程：
 1.  阅读任务说明进入任务界面 → 分配用户ID
-2.  完成角色对应的核心任务（与AI对话协作）
-3.  完成任务后，点击页面中的“保存数据”按钮
-4.  填写后测问卷
+2.  完成角色对应的核心任务<span style="color:red">（与AI对话协作）</span>
+3.  完成任务后，<span style="color:red">点击页面中的"保存数据"按钮</span>
+4.  <span style="color:red">填写后测问卷</span>
 
 ⚠️ 重要说明：
 - 本实验无对错之分，请按您的真实想法完成任务
@@ -111,7 +112,7 @@ if "consent" not in st.session_state:
 - 所有数据仅用于学术研究，不会泄露任何个人信息
 
 点击下方按钮，即表示您已阅读并同意以上说明，自愿参与本次实验。
-    """)
+    """, unsafe_allow_html=True)
 
     if st.button("我已阅读并同意，进入实验"):
         st.session_state["consent"] = True
@@ -123,8 +124,8 @@ if "consent" not in st.session_state:
 if st.query_params.get("page") == "questionnaire":
     st.title("📋 调查问卷")
     st.markdown("---")
-    st.markdown("""
-    ### 亲爱的参与者：
+    st.markdown(f"""
+    ### 亲爱的用户 (ID: {st.session_state.user_id})：
 
     感谢您完成本次实验！
 
