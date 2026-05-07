@@ -8377,3 +8377,26 @@ user_968129,low,4,1,2,"面试官您好，我叫张颖，是北京交通大学保
 如果您希望针对特定岗位（如算法岗、安全岗、开发岗）再做调整，或者需要增减某些内容，请随时告诉我。
 
 "
+user_366670,low,3,0,0,"各位面试官好：
+
+我叫孙昊，硕士毕业于深圳大学计算机科学与技术专业，研究方向为机器学习与多模态学习。在校期间，我以第一作者发表了一篇关于多模态用户参与度预测的会议论文，并获得了全国AI算法竞赛一等奖，打下了扎实的理论与竞赛实战基础。
+
+在字节跳动抖音AI实验室工作期间，我深度参与了多个算法落地项目：
+
+· 在GPT-3.5垂直领域微调中，我负责金融场景任务响应逻辑优化，通过指令微调和数据增强，将任务准确率提升了15%；
+· 主导构建了视频-文本-用户行为多模态融合模型，使推荐页点击率提升18%，并协同运营团队将算法转化为高流失用户预警策略，召回率提升22%；
+· 独立开发了LightGBM流失预测模型，通过精细调参和特征工程使AUC达到0.93，并搭建算法-运营数据看板，将验证周期缩短70%。
+
+我熟练掌握PyTorch/TensorFlow，具备从模型选型、训练调优到业务落地的全链路能力。同时，我注重将前沿AI技术与实际运营场景结合，持续推动业务指标增长。非常希望能加入贵公司，用算法创造真实价值，谢谢！","[用户]: user_366670
+
+[AI]: Hello! It looks like you might have accidentally just sent your user ID. How can I help you today? If you have a question or need assistance with something, feel free to ask!
+
+[用户]: user_366670
+
+[AI]: It looks like you've sent your username again. Let me know how I can help you today! If you have a question, need information, or want assistance with a task, just ask.
+
+[用户]: user_366670
+
+[AI]: It seems you've sent your username a few times. Could you let me know what you need help with? I'm here to assist with any questions or tasks you have.
+
+"
