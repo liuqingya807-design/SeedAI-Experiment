@@ -1,0 +1,119 @@
+import pandas as pd
+from datasets import load_dataset
+import numpy as np
+
+# ==============================================
+# 【关键】文本清洗函数：去除 Excel 不支持的特殊字符
+# ==============================================
+def clean_text(text):
+    if not isinstance(text, str):
+        return ""
+    # 去除所有控制字符（除了制表符、换行符、回车符）
+    import re
+    return re.sub(r'[\x00-\x1F\x7F]', '', text)
+
+print("正在连接 WildChat 数据集...")
+dataset = load_dataset("allenai/WildChat", split="train", streaming=True, trust_remote_code=True)
+
+keywords = {
+    "长度修改": ["太长了", "简短点", "精简", "字数", "扩写", "长一点", "短一点", "篇幅"],
+    "语气风格": ["语气", "口吻", "风格", "幽默", "专业一点", "严肃", "通俗", "拟人"],
+    "格式结构": ["表格", "列表", "列点", "Markdown", "结构化", "分点", "排版", "可视化"],
+    "角色设定": ["身份", "角色", "作为", "扮演", "你是一个", "你是", "专家", "顾问", "老师"],
+    "任务场景": ["背景", "面向", "针对", "给大二学生", "给孩子", "求职面试", "商务谈判"]
+}
+
+all_valid_rounds = []
+results = []
+analyze_target = 20000 
+valid_conversations = 0
+
+print(f"开始扫描前 {analyze_target} 条有效对话...")
+
+# 数据处理
+for data in dataset:
+    if valid_conversations >= analyze_target:
+        break
+    
+    lang = data.get('language', '')
+    conv = data.get('conversation', [])
+    
+    if lang not in ['English', 'Chinese'] or len(conv) < 3:
+        continue
+
+    valid_conversations += 1
+    total_rounds = len(conv) // 2
+    all_valid_rounds.append(total_rounds)
+    
+    mod_count = 0
+    first_mod_round = None
+    first_mod_type = None
+    original_ans = None
+    user_instruction = None
+    new_ans = None
+    
+    for i in range(1, len(conv), 2):
+        try:
+            user_msg = conv[i]['content'].strip()
+            if not user_msg:
+                continue
+            
+            found_type = None
+            for key_type, words in keywords.items():
+                if any(word in user_msg for word in words):
+                    found_type = key_type
+                    break
+            
+            if found_type:
+                mod_count += 1
+                if first_mod_round is None:
+                    first_mod_round = (i // 2) + 1
+                    first_mod_type = found_type
+                    original_ans = clean_text(conv[i-1]['content'][:150])
+                    user_instruction = clean_text(user_msg[:150])
+                    new_ans = clean_text(conv[i+1]['content'][:150]) if (i+1) < len(conv) else ""
+        except:
+            continue
+    
+    if first_mod_round is not None:
+        iteration_rate = mod_count / total_rounds if total_rounds > 0 else 0
+        results.append({
+            "对话ID": data.get('conversation_id', f"ID_{valid_conversations}"),
+            "AI模型": data.get('model', 'unknown'),
+            "修改类型": first_mod_type,
+            "首次改变轮次": first_mod_round,
+            "用户修改指令": user_instruction,
+            "AI初始回复": original_ans,
+            "AI新回复": new_ans,
+            "总轮数": total_rounds,
+            "指令迭代率": iteration_rate
+        })
+
+# ===================== 输出你要的格式 =====================
+print("\n" + "="*60)
+print("【全体有效数据描述 (2万条样本)】")
+print(f"轮次分布: 平均={np.mean(all_valid_rounds):.2f}, 最大={max(all_valid_rounds)}, 最小={min(all_valid_rounds)}")
+
+if results:
+    df = pd.DataFrame(results)
+    
+    print(f"\n【首次改变轮次分布 (First Mod)】")
+    print(f"统计: 平均={df['首次改变轮次'].mean():.2f}, 最大={df['首次改变轮次'].max()}, 最小={df['首次改变轮次'].min()}")
+    
+    print(f"\n【指令迭代率分布 (Iteration Rate)】")
+    print(f"统计: 平均={df['指令迭代率'].mean()*100:.2f}%, 最大={df['指令迭代率'].max()*100:.2f}%, 最小={df['指令迭代率'].min()*100:.2f}%")
+    print("="*60)
+
+    print("\n统计报告")
+    print(f"清洗后有效对话总数: {valid_conversations}")
+    print(f"识别到改变行为的对话数: {len(results)}")
+    print(f"默认选项改变率: {len(results)/valid_conversations*100:.2f}%")
+    print(f"首次改变平均发生轮次: {df['首次改变轮次'].mean():.2f}")
+    print("\n各维度分布:")
+    print(df["修改类型"].value_counts())
+
+    # 现在可以安全写入 Excel 了
+    df.to_excel("WildChat_Analysis.xlsx", index=False, engine="openpyxl")
+    print("\n✅ Excel 已成功保存为: WildChat_Analysis.xlsx")
+else:
+    print("未找到修改行为")
