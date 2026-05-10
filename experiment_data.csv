@@ -9132,3 +9132,16 @@ user_600822,high,3,0,0,录取：候选人3 | 专业：高 专业及技能匹配 
 [AI]: API调用失败: Error code: 402 - {'error': {'message': 'Insufficient Balance', 'type': 'unknown_error', 'param': None, 'code': 'invalid_request_error'}}
 
 "
+user_555020,high,3,1,2,录取：候选人1 | 专业：候选人李一一为苏州大学信息管理与信息系统专业硕士，属于计算机/统计/数学相关专业，学历背景完全符合岗位要求。在校系统学习了机器学习、Python编程、数据库系统等核心课程，掌握Python、PyTorch/TensorFlow框架，具备扎实的算法理论基础与工程实现能力，专业背景与岗位高度匹配。 | 算法能力：候选人具备优秀的算法优化与性能调优能力，在项目中通过RFM分层运营策略、排序算法优化等方式，将推荐准确率提升至85%，实现功能使用率提升35%、响应时效缩短40%；并通过A/B测试持续迭代模型，验证优化效果，有效提升了算法的业务价值，符合岗位对算法优化的核心要求。 | 项目经验：候选人拥有丰富的AI算法落地项目经验，主导过“AI驱动的个性化学习推荐系统”“京麦智能客服”等项目，熟悉机器学习/深度学习算法从开发、优化到业务落地的全流程。能将AI技术与用户运营场景结合，实现用户复购率、留存率、GMV等关键指标显著提升，具备将前沿技术转化为可落地方案的能力。,"[用户]: 在完成三段评价后，请额外生成一段100字以内的最终录用建议，明确说明是否推荐录用该候选人，并结合岗位要求给出1-2条核心理由，语言简洁专业。
+
+[AI]: API调用失败: Error code: 402 - {'error': {'message': 'Insufficient Balance', 'type': 'unknown_error', 'param': None, 'code': 'invalid_request_error'}}
+
+[用户]: 请根据候选人简历，补充完整三段评价的剩余内容，确保每段都有具体数据支撑，语言正式严谨。
+
+[AI]: API调用失败: Error code: 402 - {'error': {'message': 'Insufficient Balance', 'type': 'unknown_error', 'param': None, 'code': 'invalid_request_error'}}
+
+[用户]: 请为该候选人撰写一段100字以内的录用建议，明确说明是否推荐录用，并给出核心理由。
+
+[AI]: API调用失败: Error code: 402 - {'error': {'message': 'Insufficient Balance', 'type': 'unknown_error', 'param': None, 'code': 'invalid_request_error'}}
+
+"
