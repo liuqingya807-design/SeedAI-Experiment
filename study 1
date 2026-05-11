@@ -8,19 +8,18 @@ import numpy as np
 def clean_text(text):
     if not isinstance(text, str):
         return ""
-    # 去除所有控制字符（除了制表符、换行符、回车符）
     import re
     return re.sub(r'[\x00-\x1F\x7F]', '', text)
 
 print("正在连接 WildChat 数据集...")
-dataset = load_dataset("allenai/WildChat", split="train", streaming=True, trust_remote_code=True)
+dataset = load_dataset("allenai/WildChat", split="train", streaming=True)  # 已删除 trust_remote_code
 
 keywords = {
-    "长度修改": ["太长了", "简短点", "精简", "字数", "扩写", "长一点", "短一点", "篇幅"],
-    "语气风格": ["语气", "口吻", "风格", "幽默", "专业一点", "严肃", "通俗", "拟人"],
+    "长度修改": ["长", "短", "精简", "字数", "扩写", "篇幅"],
+    "语气风格": ["语气", "口吻", "风格", "幽默", "专业", "严肃", "通俗", "拟人"],
     "格式结构": ["表格", "列表", "列点", "Markdown", "结构化", "分点", "排版", "可视化"],
-    "角色设定": ["身份", "角色", "作为", "扮演", "你是一个", "你是", "专家", "顾问", "老师"],
-    "任务场景": ["背景", "面向", "针对", "给大二学生", "给孩子", "求职面试", "商务谈判"]
+    "角色设定": ["身份", "角色", "作为", "扮演", "你是一个", "你是", "专家", "顾问"],
+    "任务场景": ["背景", "面向", "针对", "场景", "求职面试", "商务谈判"]
 }
 
 all_valid_rounds = []
@@ -30,7 +29,7 @@ valid_conversations = 0
 
 print(f"开始扫描前 {analyze_target} 条有效对话...")
 
-# 数据处理
+# ===================== 【修复】主循环 + 缩进全部正确 =====================
 for data in dataset:
     if valid_conversations >= analyze_target:
         break
@@ -38,6 +37,7 @@ for data in dataset:
     lang = data.get('language', '')
     conv = data.get('conversation', [])
     
+    # 只保留中英 + 对话足够长
     if lang not in ['English', 'Chinese'] or len(conv) < 3:
         continue
 
@@ -52,7 +52,8 @@ for data in dataset:
     user_instruction = None
     new_ans = None
     
-    for i in range(1, len(conv), 2):
+    # ===================== 【修复】循环缩进 + 索引从 2 开始（正确！） =====================
+    for i in range(2, len(conv), 2):
         try:
             user_msg = conv[i]['content'].strip()
             if not user_msg:
@@ -67,14 +68,15 @@ for data in dataset:
             if found_type:
                 mod_count += 1
                 if first_mod_round is None:
-                    first_mod_round = (i // 2) + 1
+                    first_mod_round = (i // 2)  # 轮次正确
                     first_mod_type = found_type
-                    original_ans = clean_text(conv[i-1]['content'][:150])
-                    user_instruction = clean_text(user_msg[:150])
+                    original_ans = clean_text(conv[i-1]['content'][:150])   # AI 原回答
+                    user_instruction = clean_text(user_msg[:150])           # 用户修改指令
                     new_ans = clean_text(conv[i+1]['content'][:150]) if (i+1) < len(conv) else ""
         except:
             continue
     
+    # ===================== 【修复】这条缩进也修好了 =====================
     if first_mod_round is not None:
         iteration_rate = mod_count / total_rounds if total_rounds > 0 else 0
         results.append({
@@ -89,7 +91,7 @@ for data in dataset:
             "指令迭代率": iteration_rate
         })
 
-# ===================== 输出你要的格式 =====================
+# ===================== 输出 =====================
 print("\n" + "="*60)
 print("【全体有效数据描述 (2万条样本)】")
 print(f"轮次分布: 平均={np.mean(all_valid_rounds):.2f}, 最大={max(all_valid_rounds)}, 最小={min(all_valid_rounds)}")
@@ -112,8 +114,7 @@ if results:
     print("\n各维度分布:")
     print(df["修改类型"].value_counts())
 
-    # 现在可以安全写入 Excel 了
-    df.to_excel("WildChat_Analysis.xlsx", index=False, engine="openpyxl")
-    print("\n✅ Excel 已成功保存为: WildChat_Analysis.xlsx")
+    df.to_excel("WildChat_Analysis2.xlsx", index=False, engine="openpyxl")
+    print("\n✅ Excel 已成功保存为: WildChat_Analysis2.xlsx")
 else:
     print("未找到修改行为")
